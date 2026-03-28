@@ -18,9 +18,13 @@
 # Allow non-Google copyright
 # pylint: disable=g-bad-file-header
 
+from __future__ import division
+
 __author__ = 'nnaze@google.com (Nathan Naze)'
 
 import traceback
+import re
+import time
 
 import gflags as flags
 
@@ -75,8 +79,8 @@ def _Tokenize(fileobj):
     The first token in the token stream and the ending mode of the tokenizer.
   """
   tokenizer = javascripttokenizer.JavaScriptTokenizer()
-  start_token = tokenizer.TokenizeFile(fileobj)
-  return start_token, tokenizer.mode
+  start_token, last_token = tokenizer.TokenizeFile(fileobj)
+  return start_token, last_token, tokenizer.mode
 
 
 def _IsLimitedDocCheck(filename, limited_doc_files):
@@ -120,7 +124,73 @@ def Run(filename, error_handler, source=None):
   else:
     source_file = source
 
-  token, tokenizer_mode = _Tokenize(source_file)
+  #@zhiyiadd
+  #perform a global check for the source file to see if it may be a min js
+  #comment removal indicator
+  in_comment = 0
+  line_lens = []
+  for line in source_file:
+    line = line.strip()
+    if line == '':
+      continue
+    #get rid of comment line
+    if line.startswith('//'):
+      continue
+    #get rid of multiple line comment or doc comment
+    if line.startswith('/*'):
+      in_comment = 1
+    #end of comment
+    if line.endswith('*/'):
+      in_comment = 0
+    if in_comment == 1:
+      continue
+    line_chars = len(line)
+    line_lens.append(line_chars)
+
+  #check the basic line stats
+  line_num = len(line_lens)
+  line_long = 0
+  for line_len in line_lens:
+    if line_len > 200:
+      line_long += 1
+
+  #print line_lens
+  #print line_num
+  #print line_long
+  if line_num > 0:
+    avg_line_len = sum(line_lens) / line_num
+    if line_long / line_num > 0.9 or avg_line_len > 200:
+      file_stats = None
+      stats = None
+      error_stats = None
+      return file_stats, stats, error_stats
+
+  #reset file
+  if _IsHtml(filename):
+    pass
+  else:
+    #if not html, reset file
+    source_file.seek(0)
+    #source_file = open(filename)
+
+  #start_time = time.time()
+  token, last_token, tokenizer_mode = _Tokenize(source_file)
+
+  #@zhiyiadd
+  #process html in very simple manner without checking style
+  #utilize last token
+  #in total, config three indicators
+  html_file = 0
+  html_js = 0
+  html_js_line = 0
+  if _IsHtml(filename):
+    html_file = 1
+    if token is not None:
+      #has some js
+      html_js = 1
+      html_js_line = last_token.line_number
+  
+  file_stats = [filename, html_file, html_js, html_js_line]
 
   error_handler.HandleFile(filename, token)
 
@@ -134,19 +204,26 @@ def Run(filename, error_handler, source=None):
   # Run the ECMA pass
   error_token = None
 
-  ecma_pass = ecmametadatapass.EcmaMetaDataPass()
-  error_token = RunMetaDataPass(token, ecma_pass, error_handler, filename)
+  #can we skip this?
+  #ecma_pass = ecmametadatapass.EcmaMetaDataPass()
+  #error_token = RunMetaDataPass(token, ecma_pass, error_handler, filename)
 
   is_limited_doc_check = (
       _IsLimitedDocCheck(filename, flags.FLAGS.limited_doc_files))
 
-  _RunChecker(token, error_handler,
+  #print "tokenized"
+  #print (time.time() - start_time)
+  stats, error_stats = _RunChecker(token, error_handler,
               is_limited_doc_check,
               is_html=_IsHtml(filename),
               stop_token=error_token)
 
+  #print "checked"
+  #print (time.time() - start_time)
+
   error_handler.FinishFile()
 
+  return file_stats, stats, error_stats
 
 def RunMetaDataPass(start_token, metadata_pass, error_handler, filename=''):
   """Run a metadata pass over a token stream.
@@ -196,3 +273,5 @@ def _RunChecker(start_token, error_handler,
                       is_html=is_html,
                       limited_doc_checks=limited_doc_checks,
                       stop_token=stop_token)
+                    
+  return style_checker._lint_rules._stats, style_checker._lint_rules._error_stats

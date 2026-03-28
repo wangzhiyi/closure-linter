@@ -78,7 +78,13 @@ class JavaScriptStyleChecker(checkerbase.CheckerBase):
     """
     self._lint_rules.Initialize(self, limited_doc_checks, is_html)
 
-    self._state_tracker.DocFlagPass(start_token, self._error_handler)
+    #if errors happen at docflag - file ignored
+    try:
+      self._state_tracker.DocFlagPass(start_token, self._error_handler)
+    except:
+      self._lint_rules._stats = None
+      self._lint_rules._error_stats = None
+      return
 
     if self._alias_pass:
       self._alias_pass.Process(start_token)

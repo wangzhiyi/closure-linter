@@ -146,5 +146,6 @@ class JavaScriptStateTracker(statetracker.StateTracker):
       start_token = self._block_stack.pop()
       if tokenutil.GoogScopeOrNoneFromStartBlock(start_token):
         self._scope_depth -= 1
+
     super(JavaScriptStateTracker, self).HandleToken(token,
-                                                    last_non_space_token)
+                                                  last_non_space_token)

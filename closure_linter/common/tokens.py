@@ -25,6 +25,7 @@ class TokenType(object):
   NORMAL = 'normal'
   WHITESPACE = 'whitespace'
   BLANK_LINE = 'blank line'
+  EXPORT_MODULE = 'export default'
 
 
 class Token(object):

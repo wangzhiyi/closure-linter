@@ -73,7 +73,7 @@ def _GetUserSpecifiedFiles(argv, suffixes):
   Returns:
     A sequence of files to be linted.
   """
-  files = argv[1:] or []
+  files = argv[1] or []
   all_files = []
   lint_files = []
 

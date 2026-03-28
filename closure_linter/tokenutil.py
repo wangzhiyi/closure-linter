@@ -121,6 +121,7 @@ def CustomSearch(start_token, func, end_func=None, distance=None,
       previous = token.previous
       if previous:
         if func(previous):
+          #print previous.string
           return previous
         if end_func and end_func(previous):
           return None

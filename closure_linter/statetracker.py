@@ -778,6 +778,9 @@ class StateTracker(object):
     self._first_token = None
     self._documented_identifiers = set()
     self._variables_in_scope = []
+    #@zhiyiadd
+    #list of functions closed at the current state
+    self._function_close = []
 
   def DocFlagPass(self, start_token, error_handler):
     """Parses doc flags.
@@ -1156,14 +1159,16 @@ class StateTracker(object):
       name = ''
       is_assigned = last_code and (last_code.IsOperator('=') or
           last_code.IsOperator('||') or last_code.IsOperator('&&') or
-          (last_code.IsOperator(':') and not self.InObjectLiteral()))
+          last_code.IsOperator(':') or last_code.IsOperator('=>'))
+      #and not self.InObjectLiteral()
       if is_assigned:
         # TODO(robbyw): This breaks for x[2] = ...
         # Must use loop to find full function name in the case of line-wrapped
         # declarations (bug 1220601) like:
         # my.function.foo.
         #   bar = function() ...
-        identifier = tokenutil.Search(last_code, Type.SIMPLE_LVALUE, None, True)
+        identifier = tokenutil.Search(last_code, [Type.SIMPLE_LVALUE, Type.IDENTIFIER], 3, True)
+        #print str(last_code.line_number)+last_code.string + identifier.string + last_code.previous.type
         while identifier and tokenutil.IsIdentifierOrDot(identifier):
           name = identifier.string + name
           # Traverse behind us, skipping whitespace and comments.
@@ -1280,6 +1285,7 @@ class StateTracker(object):
         # TODO(robbyw): Detect the function's name for better errors.
         function = self._function_stack.pop()
         function.end_token = token
+        self._function_close.append(function)
 
         # Pop all variables till delimiter ('') those were defined in the
         # function being closed so make them out of scope.

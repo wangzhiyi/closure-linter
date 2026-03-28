@@ -480,7 +480,10 @@ class EcmaMetaDataPass(object):
     """Process the given token."""
     token = self._token
     token.metadata = self._CreateMetaData()
-    context = (self._ProcessContext() or self._context)
+    try:
+      context = (self._ProcessContext() or self._context)
+    except:
+      print str(token.line_number) + " context error"
     token.metadata.context = context
     token.metadata.last_code = self._last_code
 

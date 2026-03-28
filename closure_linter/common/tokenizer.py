@@ -73,7 +73,9 @@ class Tokenizer(object):
       self.__line_number += 1
       self.__TokenizeLine(line)
 
-    return self.__first_token
+    #@zhiyiadd
+    #return both start token and end token
+    return self.__first_token, self.__last_token
 
   def _CreateToken(self, string, token_type, line, line_number, values=None):
     """Creates a new Token object (or subclass).
@@ -106,6 +108,12 @@ class Tokenizer(object):
     if not string:
       self.__AddToken(self._CreateToken('', Type.BLANK_LINE, line, line_number))
       return
+
+    #@zhiyiadd
+    #export default cannnot be recognized, skip the line
+    #if string.startswith('export default'):
+    #  self.__AddToken(self._CreateToken('', Type.EXPORT_MODULE, line, line_number))
+    #  return
 
     normal_token = ''
     index = 0

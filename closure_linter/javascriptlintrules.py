@@ -74,6 +74,8 @@ class JavaScriptLintRules(ecmalintrules.EcmaScriptLintRules):
     # Call the base class's CheckToken function.
     super(JavaScriptLintRules, self).CheckToken(token, state)
 
+    return
+
     # Store some convenience variables
     namespaces_info = self._namespaces_info
 

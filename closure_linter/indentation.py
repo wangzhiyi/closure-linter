@@ -140,7 +140,9 @@ class IndentationRules(object):
     indentation_errors = []
     stack = self._stack
     is_first = self._IsFirstNonWhitespaceTokenInLine(token)
+    indent_stats_line = []
 
+    '''
     # Add tokens that could decrease indentation before checking.
     if token_type == Type.END_PAREN:
       self._PopTo(Type.START_PAREN)
@@ -183,7 +185,8 @@ class IndentationRules(object):
 
     elif token_type == Type.SEMICOLON:
       self._PopTransient()
-
+    '''
+    
     if (is_first and
         token_type not in (Type.COMMENT, Type.DOC_PREFIX, Type.STRING_TEXT)):
       if flags.FLAGS.debug_indentation:
@@ -194,19 +197,22 @@ class IndentationRules(object):
       # Ignore lines that start as multi-line strings since indentation is N/A.
       # Ignore lines that start with operators since we report that already.
       # Ignore lines with tabs since we report that already.
-      expected = self._GetAllowableIndentations()
-      actual = self._GetActualIndentation(token)
+      #expected = self._GetAllowableIndentations()
+      actual, indent_str = self._GetActualIndentation(token)
 
       # Special case comments describing else, case, and default.  Allow them
       # to outdent to the parent block.
+      '''
       if token_type in Type.COMMENT_TYPES:
         next_code = tokenutil.SearchExcept(token, Type.NON_CODE_TYPES)
         if next_code and next_code.type == Type.END_BLOCK:
           next_code = tokenutil.SearchExcept(next_code, Type.NON_CODE_TYPES)
         if next_code and next_code.string in ('else', 'case', 'default'):
           # TODO(robbyw): This almost certainly introduces false negatives.
-          expected |= self._AddToEach(expected, -2)
+          expected |= self._AddToEach(expected, -4)
+      '''
 
+      '''
       if actual >= 0 and actual not in expected:
         expected = sorted(expected)
         indentation_errors.append([
@@ -216,7 +222,42 @@ class IndentationRules(object):
             token,
             Position(actual, expected[0])])
         self._start_index_offset[token.line_number] = expected[0] - actual
+      '''
 
+      #@zhiyiadd
+      #here the current actual and expected have been determined
+      #can check specific types of positions that require indentation style, e.g., block
+      #technically, only consider block indent, which is relevant
+      #others are too subjective or more about alignment issue
+
+      #first check some stats
+      #print expected
+      #only process block indent
+      #length of stack above 0 suggests block indent
+      #permanent override is for the end of block
+      '''
+      if len(stack) > 0:
+        #print "current line: "+str(token.line_number)
+        if stack[-1].is_block or stack[-1].is_permanent_override:
+          #to compare the overal width of indent, get additive depth/level from expected with 2 spaces
+          indent_width = actual
+          additive_depth = list(expected)[0]/4
+          #print indent_depth
+          #print additive_depth
+          #three elements append to stats - line number, indent, estimated depth, actual indent space
+          indent_stats_line = [token.line_number, indent_width, additive_depth, indent_str]
+      '''
+      #based on some tests, this actual vs. expected approach is not applicable in some complicated structures
+      #instead, simply collect all indents and then calculate stats line by line
+      indent_space = indent_str.count(' ')
+      indent_tab = indent_str.count('\t')
+      indent_stats_line = [token.line_number, indent_space, indent_tab]
+
+      #therefore collect a list of block indent numbers
+      #then measure the proportion of indent types
+
+
+    '''
     # Add tokens that could increase indentation.
     if token_type == Type.START_BRACKET:
       self._Add(TokenInfo(
@@ -293,8 +334,8 @@ class IndentationRules(object):
         self._PopTransient()
     elif token.IsAssignment():
       self._Add(TokenInfo(token))
-
-    return indentation_errors
+    '''
+    return indentation_errors, indent_stats_line
 
   def _AddToEach(self, original, amount):
     """Returns a new set with the given amount added to each element.
@@ -345,15 +386,18 @@ class IndentationRules(object):
     #     7;
     # The second '+' does not add any required indentation.
     in_same_continuation = False
+    #print self.
+    #print self._start_index_offset
 
     for token_info in self._stack:
       token = token_info.token
+      #print str(token.line_number) + " " + token.string + " " + token.type
 
       # Handle normal additive indentation tokens.
       if not token_info.overridden_by and token.string != 'return':
         if token_info.is_block:
-          expected = self._AddToEach(expected, 2)
-          hard_stops = self._AddToEach(hard_stops, 2)
+          expected = self._AddToEach(expected, 4)
+          hard_stops = self._AddToEach(hard_stops, 4)
           in_same_continuation = False
         elif in_same_continuation:
           expected |= self._AddToEach(expected, 4)
@@ -413,13 +457,16 @@ class IndentationRules(object):
     # If it is whitespace, it is the indentation.
     if token.type == Type.WHITESPACE:
       if token.string.find('\t') >= 0:
-        return -1
+        #@zhiyiadd
+        expand_token = token.string.expandtabs()
+        return len(expand_token), token.string
+        #return -1
       else:
-        return len(token.string)
+        return len(token.string), token.string
     elif token.type == Type.PARAMETERS:
-      return len(token.string) - len(token.string.lstrip())
+      return len(token.string) - len(token.string.lstrip()), token.string
     else:
-      return 0
+      return 0, token.string
 
   def _IsFirstNonWhitespaceTokenInLine(self, token):
     """Determines if the given token is the first non-space token on its line.
