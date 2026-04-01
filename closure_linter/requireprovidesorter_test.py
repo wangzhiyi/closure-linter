@@ -49,7 +49,7 @@ class RequireProvideSorterTest(googletest.TestCase):
     sorter = requireprovidesorter.RequireProvideSorter()
     fixed_provide_string = sorter.GetFixedProvideString(token)
 
-    self.assertEquals(expected_lines, fixed_provide_string.splitlines())
+    self.assertEqual(expected_lines, fixed_provide_string.splitlines())
 
   def testGetFixedRequireString(self):
     """Tests that fixed string constains proper comments also."""
@@ -70,7 +70,7 @@ class RequireProvideSorterTest(googletest.TestCase):
     sorter = requireprovidesorter.RequireProvideSorter()
     fixed_require_string = sorter.GetFixedRequireString(token)
 
-    self.assertEquals(expected_lines, fixed_require_string.splitlines())
+    self.assertEqual(expected_lines, fixed_require_string.splitlines())
 
   def testFixRequires_removeBlankLines(self):
     """Tests that blank lines are omitted in sorted goog.require statements."""
@@ -92,7 +92,7 @@ class RequireProvideSorterTest(googletest.TestCase):
     sorter = requireprovidesorter.RequireProvideSorter()
     sorter.FixRequires(token)
 
-    self.assertEquals(expected_lines, self._GetLines(token))
+    self.assertEqual(expected_lines, self._GetLines(token))
 
   def fixRequiresTest_withTestOnly(self, position):
     """Regression-tests sorting even with a goog.setTestOnly statement.
@@ -122,7 +122,7 @@ class RequireProvideSorterTest(googletest.TestCase):
     sorter = requireprovidesorter.RequireProvideSorter()
     sorter.FixRequires(token)
 
-    self.assertEquals(expected_lines, self._GetLines(token))
+    self.assertEqual(expected_lines, self._GetLines(token))
 
   def testFixRequires_withTestOnly(self):
     """Regression-tests sorting even after a goog.setTestOnly statement."""

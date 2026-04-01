@@ -66,11 +66,11 @@ class DocCommentTest(googletest.TestCase):
     c = self._MakeDocFlagFake('param', 'bar')
     comment.AddFlag(c)
 
-    self.assertEquals(
+    self.assertEqual(
         ['foo', 'bar'],
         comment.ordered_params)
 
-    self.assertEquals(
+    self.assertEqual(
         [a, b, c],
         comment.GetDocFlags())
 
@@ -99,7 +99,7 @@ class DocCommentTest(googletest.TestCase):
     comment.AddFlag(self._MakeDocFlagFake('param', 'foo'))
     comment.AddFlag(self._MakeDocFlagFake('param', 'bar'))
 
-    self.assertEquals(
+    self.assertEqual(
         '<DocComment: [\'foo\', \'bar\'], [@param foo, @param bar]>',
         repr(comment))
 
@@ -109,14 +109,14 @@ class DocCommentTest(googletest.TestCase):
      * @param {string} [name] Name of customer.
      */""")
     flag = comment.GetFlag('param')
-    self.assertEquals('string', flag.type)
-    self.assertEquals('string', flag.jstype.ToString())
-    self.assertEquals('[name]', flag.name)
+    self.assertEqual('string', flag.type)
+    self.assertEqual('string', flag.jstype.ToString())
+    self.assertEqual('[name]', flag.name)
 
   def _ParseComment(self, script):
     """Parse a script that contains one comment and return it."""
     _, comments = testutil.ParseFunctionsAndComments(script)
-    self.assertEquals(1, len(comments))
+    self.assertEqual(1, len(comments))
     return comments[0]
 
 if __name__ == '__main__':

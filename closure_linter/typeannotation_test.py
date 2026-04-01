@@ -30,7 +30,7 @@ class TypeParserTest(googletest.TestCase):
     _, comments = testutil.ParseFunctionsAndComments(script, accumulator)
     if accumulator.GetErrors():
       raise TypeErrorException(accumulator.GetErrors())
-    self.assertEquals(1, len(comments))
+    self.assertEqual(1, len(comments))
     return comments[0]
 
   def _ParseType(self, type_str):
@@ -54,15 +54,15 @@ class TypeParserTest(googletest.TestCase):
     # Use listEqual assertion to more easily identify the difference
     self.assertListEqual(list(matching_str or type_str),
                          list(repr(parsed_type)))
-    self.assertEquals(matching_str or type_str, repr(parsed_type))
+    self.assertEqual(matching_str or type_str, repr(parsed_type))
 
     # Newlines will be inserted by the file writer.
-    self.assertEquals(type_str.replace('\n', ''), parsed_type.ToString())
+    self.assertEqual(type_str.replace('\n', ''), parsed_type.ToString())
     return parsed_type
 
   def assertNullable(self, type_str, nullable=True):
     parsed_type = self.assertProperReconstruction(type_str)
-    self.assertEquals(nullable, parsed_type.GetNullability(),
+    self.assertEqual(nullable, parsed_type.GetNullability(),
                       '"%s" should %sbe nullable' %
                       (type_str, 'not ' if nullable else ''))
 
@@ -103,15 +103,15 @@ class TypeParserTest(googletest.TestCase):
   def testIndepth(self):
     # Do an deeper check of the crazy identifier
     crazy = self.assertProperReconstruction(CRAZY_TYPE)
-    self.assertEquals('Array.', crazy.identifier)
-    self.assertEquals(1, len(crazy.sub_types))
+    self.assertEqual('Array.', crazy.identifier)
+    self.assertEqual(1, len(crazy.sub_types))
     func1 = crazy.sub_types[0]
     func2 = func1.return_type
-    self.assertEquals('function', func1.identifier)
-    self.assertEquals('function', func2.identifier)
-    self.assertEquals(3, len(func1.sub_types))
-    self.assertEquals(1, len(func2.sub_types))
-    self.assertEquals('Object.', func2.sub_types[0].sub_types[0].identifier)
+    self.assertEqual('function', func1.identifier)
+    self.assertEqual('function', func2.identifier)
+    self.assertEqual(3, len(func1.sub_types))
+    self.assertEqual(1, len(func2.sub_types))
+    self.assertEqual('Object.', func2.sub_types[0].sub_types[0].identifier)
 
   def testIterIdentifiers(self):
     nested_identifiers = self._ParseType('(a|{b:(c|function(new:d):e)})')
@@ -147,7 +147,7 @@ class TypeParserTest(googletest.TestCase):
     record = self._ParseType(long_type)
     # First check that there's not just one type with 3 return types, but three
     # top-level types.
-    self.assertEquals(3, len(record.sub_types))
+    self.assertEqual(3, len(record.sub_types))
 
     # Now extract all unknown type instances and verify that they really are.
     handle_event, sample = record.sub_types[1].sub_types
@@ -166,12 +166,12 @@ class TypeParserTest(googletest.TestCase):
     self.assertTrue(easy.record_type)
 
     easy = self.assertProperReconstruction('{a}', '{a:}').sub_types[0]
-    self.assertEquals('a', easy.key_type.identifier)
-    self.assertEquals('', easy.identifier)
+    self.assertEqual('a', easy.key_type.identifier)
+    self.assertEqual('', easy.identifier)
 
     easy = self.assertProperReconstruction('{a:b}').sub_types[0]
-    self.assertEquals('a', easy.key_type.identifier)
-    self.assertEquals('b', easy.identifier)
+    self.assertEqual('a', easy.key_type.identifier)
+    self.assertEqual('b', easy.identifier)
 
   def assertTypeError(self, type_str):
     """Asserts that parsing the given type raises a linter error."""

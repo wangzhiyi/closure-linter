@@ -121,7 +121,7 @@ class Token(object):
     Returns:
       True if the type of this token is any of the types passed in.
     """
-    if not isinstance(token_types[0], basestring):
+    if not isinstance(token_types[0], str):
       return self.type in token_types[0]
     else:
       return self.type in token_types

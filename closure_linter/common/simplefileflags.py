@@ -168,7 +168,7 @@ def FilterFiles(files):
 
   skipped = num_files - len(result_files)
   if skipped:
-    print 'Skipping %d file(s).' % skipped
+    print('Skipping %d file(s).' % skipped)
 
   return set(result_files)
 

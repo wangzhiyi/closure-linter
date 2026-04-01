@@ -18,7 +18,7 @@
 
 __author__ = 'robbyw@google.com (Robert Walker)'
 
-import StringIO
+import io
 import sys
 
 import gflags as flags
@@ -51,7 +51,7 @@ def main(argv=None):
 
   output_buffer = None
   if FLAGS.dry_run:
-    output_buffer = StringIO.StringIO()
+    output_buffer = io.StringIO()
 
   fixer = error_fixer.ErrorFixer(output_buffer)
 
@@ -59,7 +59,7 @@ def main(argv=None):
   for filename in files:
     runner.Run(filename, fixer)
     if FLAGS.dry_run:
-      print output_buffer.getvalue()
+      print(output_buffer.getvalue())
 
 
 if __name__ == '__main__':

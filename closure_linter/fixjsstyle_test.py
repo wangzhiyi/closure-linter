@@ -17,7 +17,7 @@
 
 __author__ = 'robbyw@google.com (Robby Walker)'
 
-import StringIO
+import io
 
 import gflags as flags
 import unittest as googletest
@@ -48,7 +48,7 @@ class FixJsStyleTest(googletest.TestCase):
         ['fixjsstyle.html.in.html', 'fixjsstyle.html.out.html'],
         ['fixjsstyle.oplineend.in.js', 'fixjsstyle.oplineend.out.js']]
     for [running_input_file, running_output_file] in test_cases:
-      print 'Checking %s vs %s' % (running_input_file, running_output_file)
+      print('Checking %s vs %s' % (running_input_file, running_output_file))
       input_filename = None
       golden_filename = None
       current_filename = None
@@ -71,7 +71,7 @@ class FixJsStyleTest(googletest.TestCase):
                           'with a new line.' % (input_filename))
 
       # Autofix the file, sending output to a fake file.
-      actual = StringIO.StringIO()
+      actual = io.StringIO()
       runner.Run(input_filename, error_fixer.ErrorFixer(actual))
 
       # Now compare the files.
@@ -590,7 +590,7 @@ class FixJsStyleTest(googletest.TestCase):
       original = self._GetHeader() + original
       expected = self._GetHeader() + expected
 
-    actual = StringIO.StringIO()
+    actual = io.StringIO()
     runner.Run('testing.js', error_fixer.ErrorFixer(actual), original)
     actual.seek(0)
 

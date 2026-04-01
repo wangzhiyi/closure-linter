@@ -974,7 +974,7 @@ class StateTracker(object):
     if self._cumulative_params:
       params = re.compile(r'\s+').sub('', self._cumulative_params).split(',')
       # Strip out the type from parameters of the form name:Type.
-      params = map(lambda param: param.split(':')[0], params)
+      params = [param.split(':')[0] for param in params]
 
     return params
 

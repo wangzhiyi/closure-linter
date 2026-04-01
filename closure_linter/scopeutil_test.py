@@ -82,12 +82,12 @@ class StatementTest(googletest.TestCase):
   def assertAlias(self, expected_match, script):
     statement = _ParseAssignment(script)
     match = scopeutil.MatchAlias(statement)
-    self.assertEquals(expected_match, match)
+    self.assertEqual(expected_match, match)
 
   def assertModuleAlias(self, expected_match, script):
     statement = _ParseAssignment(script)
     match = scopeutil.MatchModuleAlias(statement)
-    self.assertEquals(expected_match, match)
+    self.assertEqual(expected_match, match)
 
   def testSimpleAliases(self):
     self.assertAlias(
@@ -133,7 +133,7 @@ class ScopeBlockTest(googletest.TestCase):
 
   def assertNoBlocks(self, script):
     blocks = list(self._GetBlocks(script))
-    self.assertEquals([], blocks)
+    self.assertEqual([], blocks)
 
   def testNotBlocks(self):
     # Ensure these are not considered blocks.
@@ -145,21 +145,21 @@ class ScopeBlockTest(googletest.TestCase):
   def testNonScopeBlocks(self):
 
     blocks = list(self._GetBlocks('goog.scope(try{});'))
-    self.assertEquals(1, len(blocks))
+    self.assertEqual(1, len(blocks))
     self.assertFalse(scopeutil.IsGoogScopeBlock(blocks.pop()))
 
     blocks = list(self._GetBlocks('goog.scope(function(a,b){});'))
-    self.assertEquals(1, len(blocks))
+    self.assertEqual(1, len(blocks))
     self.assertFalse(scopeutil.IsGoogScopeBlock(blocks.pop()))
 
     blocks = list(self._GetBlocks('goog.scope(try{} catch(){});'))
     # Two blocks: try and catch.
-    self.assertEquals(2, len(blocks))
+    self.assertEqual(2, len(blocks))
     self.assertFalse(scopeutil.IsGoogScopeBlock(blocks.pop()))
     self.assertFalse(scopeutil.IsGoogScopeBlock(blocks.pop()))
 
     blocks = list(self._GetBlocks('goog.scope(try{} catch(){} finally {});'))
-    self.assertEquals(3, len(blocks))
+    self.assertEqual(3, len(blocks))
     self.assertFalse(scopeutil.IsGoogScopeBlock(blocks.pop()))
     self.assertFalse(scopeutil.IsGoogScopeBlock(blocks.pop()))
     self.assertFalse(scopeutil.IsGoogScopeBlock(blocks.pop()))
@@ -177,7 +177,7 @@ class AliasTest(googletest.TestCase):
       if match:
         matches.add(match)
 
-    self.assertEquals(
+    self.assertEqual(
         set([('bar', 'baz'),
              ('foo', 'this.foo_'),
              ('Component', 'goog.ui.Component'),
@@ -197,7 +197,7 @@ class AliasTest(googletest.TestCase):
         if scopeutil.IsInClosurizedNamespace(symbol, closurized_namepaces):
           matches.add(match)
 
-    self.assertEquals(
+    self.assertEqual(
         set([('MyClass', 'myproject.foo.MyClass'),
              ('Component', 'goog.ui.Component')]),
         matches)

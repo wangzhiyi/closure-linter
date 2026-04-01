@@ -350,7 +350,7 @@ class CheckerBase(object):
     for function_obj in self._state_tracker._function_close:
       #collect function name
       function_name = function_obj.name
-      if function_name not in self._lint_rules._stats.function_stats.keys():
+      if function_name not in list(self._lint_rules._stats.function_stats.keys()):
         #at this time, can only collect function names, full tokens haven't been parsed
         function_start_token = function_obj.start_token
         function_end_token = function_obj.end_token

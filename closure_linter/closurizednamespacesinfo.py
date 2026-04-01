@@ -61,7 +61,7 @@ class UsedNamespace(object):
 
   def __repr__(self):
     return 'UsedNamespace(%s)' % ', '.join(
-        ['%s=%s' % (k, repr(v)) for k, v in self.__dict__.iteritems()])
+        ['%s=%s' % (k, repr(v)) for k, v in self.__dict__.items()])
 
 
 class ClosurizedNamespacesInfo(object):

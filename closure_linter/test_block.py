@@ -32,5 +32,5 @@ for i in range(block_stats_len):
       total_block_count += 1
       local_blocks = []
 
-print total_block_depth
-print total_block_count
+print(total_block_depth)
+print(total_block_count)

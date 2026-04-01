@@ -77,8 +77,8 @@ def _IsFunctionLiteralBlock(block_context):
     Whether this context is a function literal block.
   """
 
-  previous_code_tokens_iter = itertools.ifilter(
-      lambda token: token not in JavaScriptTokenType.NON_CODE_TYPES,
+  previous_code_tokens_iter = filter(
+      lambda token: token.type not in JavaScriptTokenType.NON_CODE_TYPES,
       reversed(block_context.start_token))
 
   # Ignore the current token
@@ -89,7 +89,7 @@ def _IsFunctionLiteralBlock(block_context):
   previous_code_tokens.reverse()
 
   # There aren't three previous tokens.
-  if len(previous_code_tokens) is not 3:
+  if len(previous_code_tokens) != 3:
     return False
 
   # Check that the previous three code tokens are "function ()"
@@ -142,7 +142,7 @@ def _GetVarAssignmentTokens(context):
 
   # And now just those tokens that are actually code.
   is_non_code_type = lambda t: t.type not in JavaScriptTokenType.NON_CODE_TYPES
-  code_tokens = filter(is_non_code_type, statement_tokens)
+  code_tokens = list(filter(is_non_code_type, statement_tokens))
 
   # Pop off the semicolon if present.
   if code_tokens and code_tokens[-1].IsType(JavaScriptTokenType.SEMICOLON):

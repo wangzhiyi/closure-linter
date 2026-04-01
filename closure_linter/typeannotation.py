@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#*-* coding: utf-8
+# -*- coding: utf-8 -*-
 """Closure typeannotation parsing and utilities."""
 
 
@@ -18,7 +18,7 @@ class TypeAnnotation(object):
   Attribute:
     identifier: The name of the type.
     key_type: The name part before a colon.
-    sub_types: The list of sub_types used e.g. for Array.<…>
+    sub_types: The list of sub_types used e.g. for Array.<T>.
     or_null: The '?' annotation
     not_null: The '!' annotation
     type_group: If this a a grouping (a|b), but does not include function(a).

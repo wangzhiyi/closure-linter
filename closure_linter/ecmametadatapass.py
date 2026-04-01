@@ -18,6 +18,8 @@
 
 __author__ = ('robbyw@google.com (Robert Walker)')
 
+import functools
+
 from closure_linter import javascripttokens
 from closure_linter import tokenutil
 
@@ -160,7 +162,7 @@ class EcmaContext(object):
     child.parent = self
 
     self.children.append(child)
-    self.children.sort(EcmaContext._CompareContexts)
+    self.children.sort(key=functools.cmp_to_key(EcmaContext._CompareContexts))
 
   def GetRoot(self):
     """Get the root context that contains this context, if any."""
@@ -471,7 +473,7 @@ class EcmaMetaDataPass(object):
       self._token = self._token.next
 
     try:
-      self._PopContextType(self, EcmaContext.ROOT)
+      self._PopContextType(EcmaContext.ROOT)
     except ParseError:
       # Ignore the "popped to root" error.
       pass
@@ -480,10 +482,7 @@ class EcmaMetaDataPass(object):
     """Process the given token."""
     token = self._token
     token.metadata = self._CreateMetaData()
-    try:
-      context = (self._ProcessContext() or self._context)
-    except:
-      print str(token.line_number) + " context error"
+    context = self._ProcessContext() or self._context
     token.metadata.context = context
     token.metadata.last_code = self._last_code
 

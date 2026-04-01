@@ -18,13 +18,13 @@
 # Allow non-Google copyright
 # pylint: disable=g-bad-file-header
 
-from __future__ import division
+
 
 __author__ = 'nnaze@google.com (Nathan Naze)'
 
-import traceback
 import re
 import time
+import traceback
 
 import gflags as flags
 
@@ -109,9 +109,11 @@ def Run(filename, error_handler, source=None):
     source: A file-like object with the file source. If omitted, the file will
       be read from the filename path.
   """
+  opened_source = None
   if not source:
     try:
-      source = open(filename)
+      opened_source = open(filename)
+      source = opened_source
     except IOError:
       error_handler.HandleFile(filename, None)
       error_handler.HandleError(
@@ -119,111 +121,105 @@ def Run(filename, error_handler, source=None):
       error_handler.FinishFile()
       return
 
-  if _IsHtml(filename):
-    source_file = htmlutil.GetScriptLines(source)
-  else:
-    source_file = source
+  try:
+    if _IsHtml(filename):
+      source_lines = htmlutil.GetScriptLines(source)
+    else:
+      source_lines = list(source)
 
-  #@zhiyiadd
-  #perform a global check for the source file to see if it may be a min js
-  #comment removal indicator
-  in_comment = 0
-  line_lens = []
-  for line in source_file:
-    line = line.strip()
-    if line == '':
-      continue
-    #get rid of comment line
-    if line.startswith('//'):
-      continue
-    #get rid of multiple line comment or doc comment
-    if line.startswith('/*'):
-      in_comment = 1
-    #end of comment
-    if line.endswith('*/'):
-      in_comment = 0
-    if in_comment == 1:
-      continue
-    line_chars = len(line)
-    line_lens.append(line_chars)
+    #@zhiyiadd
+    #perform a global check for the source file to see if it may be a min js
+    #comment removal indicator
+    in_comment = 0
+    line_lens = []
+    for line in source_lines:
+      line = line.strip()
+      if line == '':
+        continue
+      #get rid of comment line
+      if line.startswith('//'):
+        continue
+      #get rid of multiple line comment or doc comment
+      if line.startswith('/*'):
+        in_comment = 1
+      #end of comment
+      if line.endswith('*/'):
+        in_comment = 0
+      if in_comment == 1:
+        continue
+      line_chars = len(line)
+      line_lens.append(line_chars)
 
-  #check the basic line stats
-  line_num = len(line_lens)
-  line_long = 0
-  for line_len in line_lens:
-    if line_len > 200:
-      line_long += 1
+    #check the basic line stats
+    line_num = len(line_lens)
+    line_long = 0
+    for line_len in line_lens:
+      if line_len > 200:
+        line_long += 1
 
-  #print line_lens
-  #print line_num
-  #print line_long
-  if line_num > 0:
-    avg_line_len = sum(line_lens) / line_num
-    if line_long / line_num > 0.9 or avg_line_len > 200:
-      file_stats = None
-      stats = None
-      error_stats = None
-      return file_stats, stats, error_stats
+    #print line_lens
+    #print line_num
+    #print line_long
+    if line_num > 0:
+      avg_line_len = sum(line_lens) / line_num
+      if line_long / line_num > 0.9 or avg_line_len > 200:
+        file_stats = None
+        stats = None
+        error_stats = None
+        return file_stats, stats, error_stats
 
-  #reset file
-  if _IsHtml(filename):
-    pass
-  else:
-    #if not html, reset file
-    source_file.seek(0)
-    #source_file = open(filename)
+    token, last_token, tokenizer_mode = _Tokenize(source_lines)
 
-  #start_time = time.time()
-  token, last_token, tokenizer_mode = _Tokenize(source_file)
+    #@zhiyiadd
+    #process html in very simple manner without checking style
+    #utilize last token
+    #in total, config three indicators
+    html_file = 0
+    html_js = 0
+    html_js_line = 0
+    if _IsHtml(filename):
+      html_file = 1
+      if token is not None:
+        #has some js
+        html_js = 1
+        html_js_line = last_token.line_number
 
-  #@zhiyiadd
-  #process html in very simple manner without checking style
-  #utilize last token
-  #in total, config three indicators
-  html_file = 0
-  html_js = 0
-  html_js_line = 0
-  if _IsHtml(filename):
-    html_file = 1
-    if token is not None:
-      #has some js
-      html_js = 1
-      html_js_line = last_token.line_number
-  
-  file_stats = [filename, html_file, html_js, html_js_line]
+    file_stats = [filename, html_file, html_js, html_js_line]
 
-  error_handler.HandleFile(filename, token)
+    error_handler.HandleFile(filename, token)
 
-  # If we did not end in the basic mode, this a failed parse.
-  if tokenizer_mode is not javascripttokenizer.JavaScriptModes.TEXT_MODE:
-    error_handler.HandleError(
-        error.Error(errors.FILE_IN_BLOCK,
-                    'File ended in mode "%s".' % tokenizer_mode,
-                    _GetLastNonWhiteSpaceToken(token)))
+    # If we did not end in the basic mode, this a failed parse.
+    if tokenizer_mode is not javascripttokenizer.JavaScriptModes.TEXT_MODE:
+      error_handler.HandleError(
+          error.Error(errors.FILE_IN_BLOCK,
+                      'File ended in mode "%s".' % tokenizer_mode,
+                      _GetLastNonWhiteSpaceToken(token)))
 
-  # Run the ECMA pass
-  error_token = None
+    # Run the ECMA pass
+    error_token = None
 
-  #can we skip this?
-  #ecma_pass = ecmametadatapass.EcmaMetaDataPass()
-  #error_token = RunMetaDataPass(token, ecma_pass, error_handler, filename)
+    ecma_pass = ecmametadatapass.EcmaMetaDataPass()
+    error_token = RunMetaDataPass(token, ecma_pass, error_handler, filename)
 
-  is_limited_doc_check = (
-      _IsLimitedDocCheck(filename, flags.FLAGS.limited_doc_files))
+    is_limited_doc_check = (
+        _IsLimitedDocCheck(filename, flags.FLAGS.limited_doc_files))
 
-  #print "tokenized"
-  #print (time.time() - start_time)
-  stats, error_stats = _RunChecker(token, error_handler,
-              is_limited_doc_check,
-              is_html=_IsHtml(filename),
-              stop_token=error_token)
+    #print "tokenized"
+    #print (time.time() - start_time)
+    stats, error_stats = _RunChecker(token, error_handler,
+                is_limited_doc_check,
+                is_html=_IsHtml(filename),
+                stop_token=error_token)
 
-  #print "checked"
-  #print (time.time() - start_time)
+    #print "checked"
+    #print (time.time() - start_time)
 
-  error_handler.FinishFile()
+    error_handler.FinishFile()
 
-  return file_stats, stats, error_stats
+    return file_stats, stats, error_stats
+  finally:
+    if opened_source is not None:
+      opened_source.close()
 
 def RunMetaDataPass(start_token, metadata_pass, error_handler, filename=''):
   """Run a metadata pass over a token stream.
@@ -240,7 +236,7 @@ def RunMetaDataPass(start_token, metadata_pass, error_handler, filename=''):
 
   try:
     metadata_pass.Process(start_token)
-  except ecmametadatapass.ParseError, parse_err:
+  except ecmametadatapass.ParseError as parse_err:
     if flags.FLAGS.error_trace:
       traceback.print_exc()
     error_token = parse_err.token

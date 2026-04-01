@@ -46,7 +46,7 @@ class TokenUtilTest(googletest.TestCase):
     b.next = c
     c.next = d
 
-    self.assertEquals([a, b, c, d], tokenutil.GetTokenRange(a, d))
+    self.assertEqual([a, b, c, d], tokenutil.GetTokenRange(a, d))
 
     # This is an error as e does not come after a in the token chain.
     self.assertRaises(Exception, lambda: tokenutil.GetTokenRange(a, e))
@@ -71,11 +71,11 @@ class TokenUtilTest(googletest.TestCase):
     d.line_number = 10
     e.line_number = 11
 
-    self.assertEquals(
+    self.assertEqual(
         'aaa\nbbbccc\n\n\n\nddd\neee',
         tokenutil.TokensToString([a, b, c, d, e]))
 
-    self.assertEquals(
+    self.assertEqual(
         'ddd\neee\naaa\nbbbccc',
         tokenutil.TokensToString([d, e, a, b, c]),
         'Neighboring tokens not in line_number order should have a newline '
@@ -94,15 +94,15 @@ start1. // comment
         if t.string.startswith(token_starts_with):
           return t
 
-    self.assertEquals(
+    self.assertEqual(
         None,
         tokenutil.GetPreviousCodeToken(_GetTokenStartingWith('start1')))
 
-    self.assertEquals(
+    self.assertEqual(
         '.',
         tokenutil.GetPreviousCodeToken(_GetTokenStartingWith('end1')).string)
 
-    self.assertEquals(
+    self.assertEqual(
         'start1',
         tokenutil.GetPreviousCodeToken(_GetTokenStartingWith('.')).string)
 
@@ -119,15 +119,15 @@ start1. // comment
         if t.string.startswith(token_starts_with):
           return t
 
-    self.assertEquals(
+    self.assertEqual(
         '.',
         tokenutil.GetNextCodeToken(_GetTokenStartingWith('start1')).string)
 
-    self.assertEquals(
+    self.assertEqual(
         'end1',
         tokenutil.GetNextCodeToken(_GetTokenStartingWith('.')).string)
 
-    self.assertEquals(
+    self.assertEqual(
         None,
         tokenutil.GetNextCodeToken(_GetTokenStartingWith('end1')))
 
@@ -147,15 +147,15 @@ start1 . // comment
         if t.string.startswith(token_starts_with):
           return t
 
-    self.assertEquals(
+    self.assertEqual(
         'start1',
         tokenutil.GetIdentifierStart(_GetTokenStartingWith('end1')).string)
 
-    self.assertEquals(
+    self.assertEqual(
         'start1',
         tokenutil.GetIdentifierStart(_GetTokenStartingWith('start1')).string)
 
-    self.assertEquals(
+    self.assertEqual(
         None,
         tokenutil.GetIdentifierStart(_GetTokenStartingWith('end2')))
 
@@ -191,18 +191,18 @@ start1 . // comment
     else:
       tokenutil.InsertTokenBefore(new_token, existing_token2)
 
-    self.assertEquals(existing_token1, new_token.previous)
-    self.assertEquals(existing_token2, new_token.next)
+    self.assertEqual(existing_token1, new_token.previous)
+    self.assertEqual(existing_token2, new_token.next)
 
-    self.assertEquals(new_token, existing_token1.next)
-    self.assertEquals(new_token, existing_token2.previous)
+    self.assertEqual(new_token, existing_token1.next)
+    self.assertEqual(new_token, existing_token2.previous)
 
-    self.assertEquals(existing_token1, new_token.metadata.last_code)
-    self.assertEquals(new_token, existing_token2.metadata.last_code)
+    self.assertEqual(existing_token1, new_token.metadata.last_code)
+    self.assertEqual(new_token, existing_token2.metadata.last_code)
 
-    self.assertEquals(0, existing_token1.start_index)
-    self.assertEquals(3, new_token.start_index)
-    self.assertEquals(4, existing_token2.start_index)
+    self.assertEqual(0, existing_token1.start_index)
+    self.assertEqual(3, new_token.start_index)
+    self.assertEqual(4, existing_token2.start_index)
 
   def testGetIdentifierForToken(self):
 
@@ -249,43 +249,43 @@ start11.abc. middle1.shouldNotBeIdentifier
         if t.string.startswith(token_starts_with):
           return t
 
-    self.assertEquals(
+    self.assertEqual(
         'start1.abc.def.prototype.onContinuedLine',
         tokenutil.GetIdentifierForToken(_GetTokenStartingWith('start1')))
 
-    self.assertEquals(
+    self.assertEqual(
         'start2.abc.def.hij.klm.nop',
         tokenutil.GetIdentifierForToken(_GetTokenStartingWith('start2')))
 
-    self.assertEquals(
+    self.assertEqual(
         'start3.abc.def.hij',
         tokenutil.GetIdentifierForToken(_GetTokenStartingWith('start3')))
 
-    self.assertEquals(
+    self.assertEqual(
         'start4.abc.def.hij.klm',
         tokenutil.GetIdentifierForToken(_GetTokenStartingWith('start4')))
 
-    self.assertEquals(
+    self.assertEqual(
         'start5.aaa.bbb.ccc',
         tokenutil.GetIdentifierForToken(_GetTokenStartingWith('start5')))
 
-    self.assertEquals(
+    self.assertEqual(
         'start6.abc.def',
         tokenutil.GetIdentifierForToken(_GetTokenStartingWith('start6')))
 
-    self.assertEquals(
+    self.assertEqual(
         'start7',
         tokenutil.GetIdentifierForToken(_GetTokenStartingWith('start7')))
 
-    self.assertEquals(
+    self.assertEqual(
         'start8',
         tokenutil.GetIdentifierForToken(_GetTokenStartingWith('start8')))
 
-    self.assertEquals(
+    self.assertEqual(
         'start9.abc.def',
         tokenutil.GetIdentifierForToken(_GetTokenStartingWith('start9')))
 
-    self.assertEquals(
+    self.assertEqual(
         'start10.abc.def',
         tokenutil.GetIdentifierForToken(_GetTokenStartingWith('start10')))
 

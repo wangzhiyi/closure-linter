@@ -56,9 +56,9 @@ class ErrorFixerTest(googletest.TestCase):
     jstype = comments[0].GetDocFlags()[0].jstype
     self.error_fixer.HandleFile('unittest', None)
     self.error_fixer._FixJsDocPipeNull(jstype)
-    self.assertEquals(expected, repr(jstype))
+    self.assertEqual(expected, repr(jstype))
     result = tokenutil.TokensToString(jstype.FirstToken()).strip('} */')
-    self.assertEquals(expected, result)
+    self.assertEqual(expected, result)
 
   def testFixJsDocPipeNull(self):
     self.DoTestFixJsDocPipeNull('?Object', 'Object|null')

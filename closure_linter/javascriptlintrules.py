@@ -552,7 +552,7 @@ class JavaScriptLintRules(ecmalintrules.EcmaScriptLintRules):
       if state.IsFunctionClose():
         # Pop the stack and report any remaining locals as unused.
         unused_local_variables = self._unused_local_variables_by_scope.pop()
-        for unused_token in unused_local_variables.values():
+        for unused_token in list(unused_local_variables.values()):
           self._HandleError(
               errors.UNUSED_LOCAL_VARIABLE,
               'Unused local variable: %s.' % unused_token.string,
@@ -628,7 +628,7 @@ class JavaScriptLintRules(ecmalintrules.EcmaScriptLintRules):
         errors.MISSING_GOOG_PROVIDE,
         missing_provides_msg,
         token, position=Position.AtBeginning(),
-        fix_data=(missing_provides.keys(), need_blank_line))
+        fix_data=(list(missing_provides.keys()), need_blank_line))
 
   def _ReportMissingRequires(self, missing_requires, token, need_blank_line):
     """Reports missing require statements to the error handler.
@@ -659,11 +659,11 @@ class JavaScriptLintRules(ecmalintrules.EcmaScriptLintRules):
         errors.MISSING_GOOG_REQUIRE,
         missing_requires_msg,
         token, position=Position.AtBeginning(),
-        fix_data=(missing_requires.keys(), need_blank_line))
+        fix_data=(list(missing_requires.keys()), need_blank_line))
 
   def _ReportIllegalAliasStatement(self, illegal_alias_statements):
     """Reports alias statements that would need a goog.require."""
-    for namespace, token in illegal_alias_statements.iteritems():
+    for namespace, token in illegal_alias_statements.items():
       self._HandleError(
           errors.ALIAS_STMT_NEEDS_GOOG_REQUIRE,
           'The alias definition would need the namespace \'%s\' which is not '

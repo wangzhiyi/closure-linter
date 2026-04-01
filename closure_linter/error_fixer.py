@@ -111,14 +111,14 @@ class ErrorFixer(errorhandler.ErrorHandler):
     """
 
     # Recurse into all sub_types if the error was at a deeper level.
-    map(self._FixJsDocPipeNull, js_type.IterTypes())
+    list(map(self._FixJsDocPipeNull, js_type.IterTypes()))
 
     if js_type.type_group and len(js_type.sub_types) == 2:
       # Find and remove the null sub_type:
       sub_type = None
       for sub_type in js_type.sub_types:
         if sub_type.identifier == 'null':
-          map(tokenutil.DeleteToken, sub_type.tokens)
+          list(map(tokenutil.DeleteToken, sub_type.tokens))
           self._AddFix(sub_type.tokens)
           break
       else:
@@ -249,7 +249,7 @@ class ErrorFixer(errorhandler.ErrorHandler):
         num_lines *= -1
         should_delete = True
 
-      for unused_i in xrange(1, num_lines + 1):
+      for unused_i in range(1, num_lines + 1):
         if should_delete:
           # TODO(user): DeleteToken should update line numbers.
           self._DeleteToken(token.previous)
@@ -552,7 +552,7 @@ class ErrorFixer(errorhandler.ErrorHandler):
       token_count: The total number of tokens to delete.
     """
     if token == self._file_token:
-      for unused_i in xrange(token_count):
+      for unused_i in range(token_count):
         self._file_token = self._file_token.next
 
     tokenutil.DeleteTokens(token, token_count)
@@ -577,8 +577,8 @@ class ErrorFixer(errorhandler.ErrorHandler):
       f = self._external_file
       if not f:
         error_noun = 'error' if self._file_fix_count == 1 else 'errors'
-        print 'Fixed %d %s in %s' % (
-            self._file_fix_count, error_noun, self._file_name)
+        print('Fixed %d %s in %s' % (
+            self._file_fix_count, error_noun, self._file_name))
         f = open(self._file_name, 'w')
 
       token = self._file_token
@@ -608,8 +608,8 @@ class ErrorFixer(errorhandler.ErrorHandler):
             f.write(original_lines[token.orig_line_number - 1])
           line = ''
           if char_count > 80 and token.line_number in self._file_changed_lines:
-            print 'WARNING: Line %d of %s is now longer than 80 characters.' % (
-                token.line_number, self._file_name)
+            print('WARNING: Line %d of %s is now longer than 80 characters.' % (
+                token.line_number, self._file_name))
 
           char_count = 0
 

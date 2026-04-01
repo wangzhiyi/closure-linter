@@ -21,7 +21,7 @@
 
 __author__ = ('nnaze@google.com (Nathan Naze)')
 
-import StringIO
+import io
 
 from closure_linter import ecmametadatapass
 from closure_linter import javascriptstatetracker
@@ -38,11 +38,12 @@ def TokenizeSource(source):
     The first token of the resulting token stream.
   """
 
-  if isinstance(source, basestring):
-    source = StringIO.StringIO(source)
+  if isinstance(source, str):
+    source = io.StringIO(source)
 
   tokenizer = javascripttokenizer.JavaScriptTokenizer()
-  return tokenizer.TokenizeFile(source)
+  start_token, _ = tokenizer.TokenizeFile(source)
+  return start_token
 
 
 def TokenizeSourceAndRunEcmaPass(source):

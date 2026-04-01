@@ -17,7 +17,7 @@
 
 __author__ = ('nnaze@google.com (Nathan Naze)')
 
-import StringIO
+import io
 
 
 import mox
@@ -82,7 +82,7 @@ class RunnerTest(googletest.TestCase):
 
     self.mox.ReplayAll()
 
-    source = StringIO.StringIO(_BAD_TOKENIZATION_SCRIPT)
+    source = io.StringIO(_BAD_TOKENIZATION_SCRIPT)
     runner.Run('foo.js', mock_error_handler, source)
 
     self.mox.VerifyAll()

@@ -18,14 +18,12 @@
 
 __author__ = ('robbyw@google.com (Robert Walker)')
 
-import cStringIO
-import formatter
-import htmllib
-import HTMLParser
+import html.parser
+import io
 import re
 
 
-class ScriptExtractor(htmllib.HTMLParser):
+class ScriptExtractor(html.parser.HTMLParser):
   """Subclass of HTMLParser that extracts script contents from an HTML file.
 
   Also inserts appropriate blank lines so that line numbers in the extracted
@@ -34,9 +32,17 @@ class ScriptExtractor(htmllib.HTMLParser):
 
   def __init__(self):
     """Initialize a ScriptExtractor."""
-    htmllib.HTMLParser.__init__(self, formatter.NullFormatter())
+    super(ScriptExtractor, self).__init__()
     self._in_script = False
     self._text = ''
+
+  def handle_starttag(self, tag, attrs):
+    if tag.lower() == 'script':
+      self.start_script(attrs)
+
+  def handle_endtag(self, tag):
+    if tag.lower() == 'script':
+      self.end_script()
 
   def start_script(self, attrs):
     """Internal handler for the start of a script tag.
@@ -87,7 +93,7 @@ class ScriptExtractor(htmllib.HTMLParser):
     """
     # We append 'x' to both sides of the string to ensure that splitlines
     # gives us an accurate count.
-    for i in xrange(len(('x' + data + 'x').splitlines()) - 1):
+    for i in range(len(('x' + data + 'x').splitlines()) - 1):
       self._text += '\n'
 
   def GetScriptLines(self):
@@ -123,45 +129,31 @@ def GetScriptLines(f):
   return extractor.GetScriptLines()
 
 
-def StripTags(str):
+def StripTags(html_text):
   """Returns the string with HTML tags stripped.
 
   Args:
-    str: An html string.
+    html_text: An html string.
 
   Returns:
     The html string with all tags stripped. If there was a parse error, returns
     the text successfully parsed so far.
   """
-  # Brute force approach to stripping as much HTML as possible. If there is a
-  # parsing error, don't strip text before parse error position, and continue
-  # trying from there.
-  final_text = ''
-  finished = False
-  while not finished:
-    try:
-      strip = _HtmlStripper()
-      strip.feed(str)
-      strip.close()
-      str = strip.get_output()
-      final_text += str
-      finished = True
-    except HTMLParser.HTMLParseError, e:
-      final_text += str[:e.offset]
-      str = str[e.offset + 1:]
-
-  return final_text
+  strip = _HtmlStripper()
+  strip.feed(html_text)
+  strip.close()
+  return strip.get_output()
 
 
-class _HtmlStripper(HTMLParser.HTMLParser):
+class _HtmlStripper(html.parser.HTMLParser):
   """Simple class to strip tags from HTML.
 
   Does so by doing nothing when encountering tags, and appending character data
   to a buffer when that is encountered.
   """
   def __init__(self):
-    self.reset()
-    self.__output = cStringIO.StringIO()
+    super(_HtmlStripper, self).__init__()
+    self.__output = io.StringIO()
 
   def handle_data(self, d):
     self.__output.write(d)

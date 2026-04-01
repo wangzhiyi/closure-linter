@@ -144,7 +144,9 @@ class EcmaScriptLintRules(checkerbase.LintRulesBase):
     line = ''.join(line)
     line = line.rstrip('\n\r\f')
     try:
-      length = len(unicode(line, 'utf-8'))
+      if isinstance(line, bytes):
+        line = line.decode('utf-8')
+      length = len(line)
     except (LookupError, UnicodeDecodeError):
       # Unknown encoding. The line length may be wrong, as was originally the
       # case for utf-8 (see bug 1735846). For now just accept the default
@@ -210,7 +212,9 @@ class EcmaScriptLintRules(checkerbase.LintRulesBase):
     line = ''.join(line)
     line = line.rstrip('\n\r\f')
     try:
-      length = len(unicode(line, 'utf-8'))
+      if isinstance(line, bytes):
+        line = line.decode('utf-8')
+      length = len(line)
     except (LookupError, UnicodeDecodeError):
       # Unknown encoding. The line length may be wrong, as was originally the
       # case for utf-8 (see bug 1735846). For now just accept the default
@@ -699,7 +703,7 @@ class EcmaScriptLintRules(checkerbase.LintRulesBase):
       function_close = state._function_close
       #loop functions the state is in
       #first, collect function names
-      for function_name in function_names.keys():
+      for function_name in list(function_names.keys()):
         if function_name == '':
           self._stats.function_no_name += 1
           continue   
@@ -1264,25 +1268,25 @@ class EcmaScriptLintRules(checkerbase.LintRulesBase):
               # JavaScript care but languages such as ActionScript or Java
               # that allow variables to be typed don't care.
               if not self._limited_doc_checks:
-                self.HandleMissingParameterDoc(token, params_iter.next())
+                self.HandleMissingParameterDoc(token, next(params_iter))
 
             elif op == 'D':
               # Deletion
               self._HandleError(errors.EXTRA_PARAMETER_DOCUMENTATION,
                                 'Found docs for non-existing parameter: "%s"' %
-                                docs_iter.next(), token)
+                                next(docs_iter), token)
             elif op == 'S':
               # Substitution
               if not self._limited_doc_checks:
                 self._HandleError(
                     errors.WRONG_PARAMETER_DOCUMENTATION,
                     'Parameter mismatch: got "%s", expected "%s"' %
-                    (params_iter.next(), docs_iter.next()), token)
+                    (next(params_iter), next(docs_iter)), token)
 
             else:
               # Equality - just advance the iterators
-              params_iter.next()
-              docs_iter.next()
+              next(params_iter)
+              next(docs_iter)
 
     elif token_type == Type.STRING_TEXT:
       # If this is the first token after the start of the string, but it's at
@@ -1377,7 +1381,7 @@ class EcmaScriptLintRules(checkerbase.LintRulesBase):
 
     try:
       self._indentation.Finalize()
-    except Exception, e:
+    except Exception as e:
       self._HandleError(
           errors.FILE_DOES_NOT_PARSE,
           str(e),
