@@ -631,13 +631,15 @@ def _SaveData(file_stats, stats, error_stats, project_argv):
 
 def _SaveDatabase(style_metric_list):
   #connect database and save data
-  # MYSQL SETTING
-  HOST = "localhost"
-  DATABASE = "ghtorrent" #database name
-  USER = "root"
-  PASSWORD = "root"
-  LOCK_TIMEOUT = 120
-  CREATE_TABLE = True
+  host = os.getenv('MYSQL_STYLE_METRIC_HOST', 'localhost')
+  database = os.getenv('MYSQL_STYLE_METRIC_DATABASE', 'ghtorrent')
+  user = os.getenv('MYSQL_STYLE_METRIC_USER')
+  password = os.getenv('MYSQL_STYLE_METRIC_PASSWORD')
+  lock_timeout = int(os.getenv('MYSQL_STYLE_METRIC_LOCK_TIMEOUT', '120'))
+
+  # Skip persistence when credentials are not provided explicitly.
+  if not user or not password:
+    return
 
   create_style_metric = """
       CREATE TABLE IF NOT EXISTS style_metric (
@@ -803,11 +805,11 @@ def _SaveDatabase(style_metric_list):
                 %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
   """ 
 
-  con = mysql.connector.connect(user=USER,
-                                password=PASSWORD,
-                                host=HOST,
-                                database=DATABASE,
-                                connection_timeout=LOCK_TIMEOUT)
+  con = mysql.connector.connect(user=user,
+                                password=password,
+                                host=host,
+                                database=database,
+                                connection_timeout=lock_timeout)
   cur = con.cursor()
   cur.executemany(insert_style_metric, style_metric_list)
   con.commit()
