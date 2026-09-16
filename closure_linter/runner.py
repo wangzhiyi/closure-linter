@@ -18,8 +18,7 @@
 # Allow non-Google copyright
 # pylint: disable=g-bad-file-header
 
-# Updated 2026 for style metrics
-# Modified from closure linter
+# Modified from Closure Linter for style metrics updates.
 
 __author__ = 'nnaze@google.com (Nathan Naze)'
 
