@@ -112,7 +112,7 @@ def Run(filename, error_handler, source=None):
   opened_source = None
   if not source:
     try:
-      opened_source = open(filename)
+      opened_source = open(filename, encoding='utf-8')
       source = opened_source
     except IOError:
       error_handler.HandleFile(filename, None)

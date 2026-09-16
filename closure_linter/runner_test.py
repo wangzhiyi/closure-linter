@@ -18,6 +18,8 @@
 __author__ = ('nnaze@google.com (Nathan Naze)')
 
 import io
+import os
+import tempfile
 
 
 import mox
@@ -28,6 +30,7 @@ import unittest as googletest
 from closure_linter import errors
 from closure_linter import runner
 from closure_linter.common import error
+from closure_linter.common import erroraccumulator
 from closure_linter.common import errorhandler
 from closure_linter.common import tokens
 
@@ -66,6 +69,21 @@ class RunnerTest(googletest.TestCase):
     runner.Run('does_not_exist.js', mock_error_handler)
 
     self.mox.VerifyAll()
+
+  def testRunOnUtf8File(self):
+    """Tests that source files are decoded as UTF-8 on every platform."""
+    file_descriptor, filename = tempfile.mkstemp(suffix='.js')
+    os.close(file_descriptor)
+    try:
+      with open(filename, 'w', encoding='utf-8') as source:
+        source.write("var message = '\U0001f600';\n")
+
+      error_handler = erroraccumulator.ErrorAccumulator()
+      result = runner.Run(filename, error_handler)
+
+      self.assertIsNotNone(result)
+    finally:
+      os.remove(filename)
 
   def testBadTokenization(self):
     mock_error_handler = self.mox.CreateMock(errorhandler.ErrorHandler)

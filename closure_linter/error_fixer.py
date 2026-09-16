@@ -570,7 +570,7 @@ class ErrorFixer(errorhandler.ErrorHandler):
     if self._file_fix_count:
       # Get the original file content for html.
       if self._file_is_html:
-        f = open(self._file_name, 'r')
+        f = open(self._file_name, 'r', encoding='utf-8')
         original_lines = f.readlines()
         f.close()
 
@@ -579,7 +579,7 @@ class ErrorFixer(errorhandler.ErrorHandler):
         error_noun = 'error' if self._file_fix_count == 1 else 'errors'
         print('Fixed %d %s in %s' % (
             self._file_fix_count, error_noun, self._file_name))
-        f = open(self._file_name, 'w')
+        f = open(self._file_name, 'w', encoding='utf-8')
 
       token = self._file_token
       # Finding the first not deleted token.

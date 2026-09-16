@@ -70,12 +70,12 @@ class AnnotatedFileTestCase(googletest.TestCase):
     """Runs the test."""
     try:
       filename = self._filename
-      stream = open(filename)
+      with open(filename, encoding='utf-8') as stream:
+        expected = self._GetExpectedMessages(stream)
     except IOError as ex:
       raise IOError('Could not find testdata resource for %s: %s' %
                     (self._filename, ex))
 
-    expected = self._GetExpectedMessages(stream)
     got = self._ProcessFileAndGetMessages(filename)
     self.assertEqual(expected, got)
 
