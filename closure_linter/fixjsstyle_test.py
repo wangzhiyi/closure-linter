@@ -63,7 +63,7 @@ class FixJsStyleTest(googletest.TestCase):
                       (current_filename, ex))
 
       if running_input_file == 'fixjsstyle.in.js':
-        with open(input_filename) as f:
+        with io.open(input_filename, encoding='utf-8') as f:
           for line in f:
             # Go to last line.
             pass
@@ -76,13 +76,8 @@ class FixJsStyleTest(googletest.TestCase):
 
       # Now compare the files.
       actual.seek(0)
-      expected = open(golden_filename, 'r')
-
-      # Uncomment to generate new golden files and run
-      # open('/'.join(golden_filename.split('/')[4:]), 'w').write(actual.read())
-      # actual.seek(0)
-
-      self.assertEqual(actual.readlines(), expected.readlines())
+      with io.open(golden_filename, 'r', encoding='utf-8') as expected:
+        self.assertEqual(actual.readlines(), expected.readlines())
 
   def testAddProvideFirstLine(self):
     """Tests handling of case where goog.provide is added."""
