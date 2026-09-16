@@ -23,6 +23,7 @@ on devtools/javascript/gpylint/full_test.py.
 __author__ = ('robbyw@google.com (Robert Walker)',
               'ajp@google.com (Andy Perelson)')
 
+import io
 import re
 
 import gflags as flags
@@ -70,7 +71,7 @@ class AnnotatedFileTestCase(googletest.TestCase):
     """Runs the test."""
     try:
       filename = self._filename
-      with open(filename, encoding='utf-8') as stream:
+      with io.open(filename, encoding='utf-8') as stream:
         expected = self._GetExpectedMessages(stream)
     except IOError as ex:
       raise IOError('Could not find testdata resource for %s: %s' %

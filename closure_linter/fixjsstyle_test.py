@@ -63,7 +63,7 @@ class FixJsStyleTest(googletest.TestCase):
                       (current_filename, ex))
 
       if running_input_file == 'fixjsstyle.in.js':
-        with open(input_filename, encoding='utf-8') as f:
+        with io.open(input_filename, encoding='utf-8') as f:
           for line in f:
             # Go to last line.
             pass
@@ -76,7 +76,7 @@ class FixJsStyleTest(googletest.TestCase):
 
       # Now compare the files.
       actual.seek(0)
-      with open(golden_filename, 'r', encoding='utf-8') as expected:
+      with io.open(golden_filename, 'r', encoding='utf-8') as expected:
         self.assertEqual(actual.readlines(), expected.readlines())
 
   def testAddProvideFirstLine(self):

@@ -22,6 +22,7 @@
 
 __author__ = 'nnaze@google.com (Nathan Naze)'
 
+import io
 import re
 import time
 import traceback
@@ -112,7 +113,7 @@ def Run(filename, error_handler, source=None):
   opened_source = None
   if not source:
     try:
-      opened_source = open(filename, encoding='utf-8')
+      opened_source = io.open(filename, encoding='utf-8')
       source = opened_source
     except IOError:
       error_handler.HandleFile(filename, None)

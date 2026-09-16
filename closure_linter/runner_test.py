@@ -75,7 +75,7 @@ class RunnerTest(googletest.TestCase):
     file_descriptor, filename = tempfile.mkstemp(suffix='.js')
     os.close(file_descriptor)
     try:
-      with open(filename, 'w', encoding='utf-8') as source:
+      with io.open(filename, 'w', encoding='utf-8') as source:
         source.write("var message = '\U0001f600';\n")
 
       error_handler = erroraccumulator.ErrorAccumulator()
