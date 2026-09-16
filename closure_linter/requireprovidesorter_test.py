@@ -94,6 +94,30 @@ class RequireProvideSorterTest(googletest.TestCase):
 
     self.assertEqual(expected_lines, self._GetLines(token))
 
+  def testCheckProvides_withEmptyNamespace(self):
+    """Tests that an empty namespace does not fail alphabetization checks."""
+    input_lines = [
+        'goog.provide(\'\');',
+        'goog.provide(\'package.xyz\');'
+    ]
+    token = testutil.TokenizeSourceAndRunEcmaPass(input_lines)
+
+    sorter = requireprovidesorter.RequireProvideSorter()
+
+    self.assertIsNone(sorter.CheckProvides(token))
+
+  def testCheckRequires_withEmptyNamespace(self):
+    """Tests that an empty namespace can be compared with valid namespaces."""
+    input_lines = [
+        'goog.require(\'package.xyz\');',
+        'goog.require(\'\');'
+    ]
+    token = testutil.TokenizeSourceAndRunEcmaPass(input_lines)
+
+    sorter = requireprovidesorter.RequireProvideSorter()
+
+    self.assertIsNotNone(sorter.CheckRequires(token))
+
   def fixRequiresTest_withTestOnly(self, position):
     """Regression-tests sorting even with a goog.setTestOnly statement.
 

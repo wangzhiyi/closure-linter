@@ -35,6 +35,11 @@ from closure_linter import tokenutil
 Type = javascripttokens.JavaScriptTokenType
 
 
+def _NamespaceSortKey(namespace):
+  """Returns a Python 3-safe sort key for a dependency namespace."""
+  return namespace if namespace is not None else ''
+
+
 class RequireProvideSorter(object):
   """Checks for and fixes alphabetization of provide and require statements.
 
@@ -60,7 +65,7 @@ class RequireProvideSorter(object):
     """
     provide_tokens = self._GetRequireOrProvideTokens(token, 'goog.provide')
     provide_strings = self._GetRequireOrProvideTokenStrings(provide_tokens)
-    sorted_provide_strings = sorted(provide_strings)
+    sorted_provide_strings = sorted(provide_strings, key=_NamespaceSortKey)
     if provide_strings != sorted_provide_strings:
       return provide_tokens[0]
     return None
@@ -82,7 +87,7 @@ class RequireProvideSorter(object):
     """
     require_tokens = self._GetRequireOrProvideTokens(token, 'goog.require')
     require_strings = self._GetRequireOrProvideTokenStrings(require_tokens)
-    sorted_require_strings = sorted(require_strings)
+    sorted_require_strings = sorted(require_strings, key=_NamespaceSortKey)
     if require_strings != sorted_require_strings:
       return require_tokens[0]
     return None
@@ -114,7 +119,7 @@ class RequireProvideSorter(object):
               be the first goog.provide or goog.require token.
     """
     strings = self._GetRequireOrProvideTokenStrings(tokens)
-    sorted_strings = sorted(strings)
+    sorted_strings = sorted(strings, key=_NamespaceSortKey)
 
     # Make a separate pass to remove any blank lines between goog.require/
     # goog.provide tokens.
@@ -317,7 +322,7 @@ class RequireProvideSorter(object):
     # it was on, including any comments immediately before it or after it on the
     # same line.
     tokens_map = self._GetTokensMap(tokens)
-    sorted_strings = sorted(tokens_map.keys())
+    sorted_strings = sorted(tokens_map.keys(), key=_NamespaceSortKey)
 
     new_order = ''
     for string in sorted_strings:
